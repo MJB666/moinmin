@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FreeHub · 免费资源导航</title>
+  <meta name="description" content="一个专门收集免费链接与实用工具的导航站">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🆓</text></svg>">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-logo">🆓</span>
+        <span class="brand-name" id="siteTitle">FreeHub</span>
+      </a>
+
+      <div class="search">
+        <span class="search-icon">🔍</span>
+        <input id="searchInput" type="search" placeholder="搜索应用、工具、关键词…" autocomplete="off">
+      </div>
+
+      <div class="header-actions">
+        <button id="themeBtn" class="btn ghost" title="切换深色 / 浅色">🌙</button>
+        <a class="btn" href="admin.html">后台管理</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <aside class="sidebar">
+      <p class="side-title">分类</p>
+      <ul class="cat-list" id="catList"></ul>
+    </aside>
+
+    <section class="content">
+      <div class="content-head">
+        <h2 id="catTitle">全部</h2>
+        <span class="muted" id="catDesc"></span>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" hidden>没有找到匹配的结果 🙈</div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p id="footerText">FreeHub · 链接均来自互联网，本站仅作导航收集 · <a href="admin.html">后台管理</a></p>
+    </div>
+  </footer>
+
+  <script src="assets/seed.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

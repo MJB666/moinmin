@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>莫印泯</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#070a12">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="莫印泯">
+<meta name="description" content="莫印泯 · 一键直达官方 App 与商品页">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== 背景层 ===================== -->
+<div class="bg" id="bg">
+  <div class="bg-pic" id="bgA"></div>
+  <div class="bg-pic" id="bgB"></div>
+  <video class="bg-video" id="bgVideo" playsinline webkit-playsinline muted loop preload="none"></video>
+  <div class="bg-tint"></div>
+  <div class="bg-vig"></div>
+</div>
+
+<!-- ===================== 液态玻璃滤镜（SVG 折射 + 色差） ===================== -->
+<svg class="svgdefs" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 有机噪声：造出「液态」的起伏 -->
+    <filter id="lgNoise" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="3" seed="11" result="t"/>
+      <feGaussianBlur in="t" stdDeviation="0.7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="16"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- 边缘折射 + 色差：把高光层按 R / G / B 三个通道分别位移再叠回去 -->
+    <filter id="lgRim" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018 0.026" numOctaves="2" seed="3" result="t"/>
+      <feGaussianBlur in="t" stdDeviation="1.1" result="n"/>
+
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="9"
+                         xChannelSelector="R" yChannelSelector="G" result="dR"/>
+      <feColorMatrix in="dR" type="matrix" result="cR"
+        values="1 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 1 0"/>
+
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2"
+                         xChannelSelector="R" yChannelSelector="G" result="dG"/>
+      <feColorMatrix in="dG" type="matrix" result="cG"
+        values="0 0 0 0 0
+                0 1 0 0 0
+                0 0 0 0 0
+                0 0 0 1 0"/>
+
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="-9"
+                         xChannelSelector="R" yChannelSelector="G" result="dB"/>
+      <feColorMatrix in="dB" type="matrix" result="cB"
+        values="0 0 0 0 0
+                0 0 0 0 0
+                0 0 1 0 0
+                0 0 0 1 0"/>
+
+      <feBlend in="cR" in2="cG" mode="screen" result="rg"/>
+      <feBlend in="rg" in2="cB" mode="screen"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ===================== 顶部 ===================== -->
+<header class="topbar lg">
+  <div class="brand">
+    <img class="brand-ico" id="brandIco" src="icon-192.png" alt="莫印泯">
+    <div class="brand-txt">
+      <h1>莫印泯</h1>
+      <p id="brandSub">一键直达官方 App / 商品页</p>
+    </div>
+  </div>
+  <div class="top-btns">
+    <button class="icobtn" id="btnMenu" aria-label="设置">☰</button>
+  </div>
+</header>
+
+<!-- ===================== 快捷按钮 ===================== -->
+<nav class="quick" id="quick">
+  <button class="pill" id="btnAdd">＋ 添加</button>
+  <button class="pill" id="btnClip">📋 剪贴板</button>
+  <button class="pill" id="btnAuto">🔁 自动切换</button>
+  <button class="pill" id="btnPickImg">🖼 选图</button>
+  <button class="pill" id="btnVideo">▶ 视频</button>
+</nav>
+
+<!-- ===================== 卡片 ===================== -->
+<main class="cards" id="cards"></main>
+
+<!-- ===================== 底部提示 ===================== -->
+<div class="hint" id="hint">轻点卡片打开 · 长按卡片弹出菜单</div>
+
+<!-- ===================== 右键/长按 浮层面板 ===================== -->
+<div class="ctx" id="ctx" hidden></div>
+
+<!-- ===================== 底部编辑面板 ===================== -->
+<div class="sheet-wrap" id="sheetWrap" hidden>
+  <div class="sheet-mask" id="sheetMask"></div>
+  <section class="sheet lg" id="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-grip" id="sheetGrip"></div>
+    <div class="sheet-head">
+      <h2 id="sheetTitle">标题</h2>
+      <button class="xbtn" id="sheetX" aria-label="关闭">✕</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="ring" id="ring" hidden><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="19"/><circle class="ring-fg" cx="22" cy="22" r="19" id="ringFg"/></svg></div>
+
+<input type="file" id="fileImg" accept="image/*" hidden>
+<input type="file" id="fileVid" accept="video/*" hidden>
+
+<script src="media.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

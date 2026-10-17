@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>后台管理 · FreeHub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-logo">⚙️</span>
+        <span class="brand-name">后台管理</span>
+      </a>
+      <div class="header-actions">
+        <button id="themeBtn" class="btn ghost" title="切换主题">🌙</button>
+        <a class="btn ghost" href="index.html">← 返回前台</a>
+        <button id="logoutBtn" class="btn" hidden>退出登录</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 登录 ============ -->
+  <section id="loginView" class="wrap">
+    <div class="panel login-card">
+      <h3>🔐 管理员登录</h3>
+      <div class="field">
+        <label>密码</label>
+        <input id="loginPass" type="password" placeholder="默认密码：admin123">
+        <p class="hint">纯前端校验，仅供本地/自用，不具备真正的安全防护。</p>
+      </div>
+      <button id="loginBtn" class="btn block">登录</button>
+    </div>
+  </section>
+
+  <!-- ============ 管理面板 ============ -->
+  <section id="adminView" class="wrap admin-wrap" hidden>
+    <div class="toolbar">
+      <button id="addCatBtn" class="btn">＋ 新建分类</button>
+      <button id="addItemBtn" class="btn">＋ 添加链接</button>
+      <span style="flex:1"></span>
+      <button id="exportBtn" class="btn ghost">导出 JSON</button>
+      <button id="importBtn" class="btn ghost">导入 JSON</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden>
+      <button id="resetBtn" class="btn danger">恢复默认</button>
+    </div>
+
+    <div class="admin-grid">
+      <!-- 左：分类 -->
+      <div class="panel">
+        <h3>📁 分类 <span class="spacer"></span><span class="muted" id="catTotal"></span></h3>
+        <ul class="admin-cat-list" id="adminCatList"></ul>
+      </div>
+
+      <!-- 右：链接 + 站点设置 -->
+      <div>
+        <div class="panel" style="margin-bottom:20px">
+          <h3>
+            <span id="curCatName">请选择分类</span>
+            <span class="spacer"></span>
+            <button id="renameCatBtn" class="icon-btn" title="重命名分类">✏️</button>
+            <button id="delCatBtn" class="icon-btn del" title="删除分类">🗑️</button>
+          </h3>
+          <table class="items">
+            <thead>
+              <tr><th style="width:44px">图标</th><th>名称</th><th>链接</th><th style="width:70px">热门</th><th style="width:120px"></th></tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+          <div class="empty" id="itemsEmpty" hidden>这个分类下还没有链接，点上方「＋ 添加链接」</div>
+        </div>
+
+        <div class="panel">
+          <h3>⚙️ 站点设置</h3>
+          <div class="row-2">
+            <div class="field">
+              <label>站点标题</label>
+              <input id="setTitle" type="text">
+            </div>
+            <div class="field">
+              <label>管理密码</label>
+              <input id="setPass" type="text">
+            </div>
+          </div>
+          <div class="field">
+            <label>副标题 / 简介</label>
+            <input id="setSubtitle" type="text">
+          </div>
+          <div class="field">
+            <label>页脚备案号（可留空）</label>
+            <input id="setIcp" type="text" placeholder="如：京ICP备xxxxxxxx号">
+          </div>
+          <button id="saveSettingsBtn" class="btn">保存设置</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 链接编辑弹窗 ============ -->
+  <div class="modal-mask" id="itemModal">
+    <div class="modal">
+      <h3 id="itemModalTitle">添加链接</h3>
+      <input type="hidden" id="itemId">
+      <div class="row-2">
+        <div class="field">
+          <label>名称 *</label>
+          <input id="itemName" type="text" placeholder="如：Motrix">
+        </div>
+        <div class="field">
+          <label>图标（emoji，可留空）</label>
+          <input id="itemIcon" type="text" placeholder="如：⬇️，留空则用首字母">
+        </div>
+      </div>
+      <div class="field">
+        <label>类型</label>
+        <select id="itemKind">
+          <option value="link">普通链接（点击跳转到网站）</option>
+          <option value="download">安装包 / 可下载文件</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>链接地址 *</label>
+        <input id="itemUrl" type="text" placeholder="https://example.com">
+        <p class="hint" id="itemUrlHint">普通链接填网站地址；安装包填文件下载直链</p>
+      </div>
+      <div class="field">
+        <label>描述</label>
+        <textarea id="itemDesc" placeholder="一句话说明这个应用/工具是做什么的"></textarea>
+      </div>
+
+      <!-- 仅「安装包」类型显示 -->
+      <div id="dlFields" hidden>
+        <div class="row-2">
+          <div class="field">
+            <label>版本号</label>
+            <input id="itemVersion" type="text" placeholder="如：v1.2.3">
+          </div>
+          <div class="field">
+            <label>文件大小</label>
+            <input id="itemSize" type="text" placeholder="如：58 MB">
+          </div>
+        </div>
+        <div class="field">
+          <label>适用平台</label>
+          <input id="itemPlatform" type="text" placeholder="如：Windows 10/11 · 64 位">
+        </div>
+        <div class="field">
+          <label>其他下载源 / 镜像（每行一个，格式：名称 | 链接）</label>
+          <textarea id="itemMirrors" placeholder="官方直链 | https://xxx.oss-cn-hangzhou.aliyuncs.com/motrix.exe&#10;百度网盘 | https://pan.baidu.com/s/xxxx"></textarea>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>标签（逗号分隔）</label>
+          <input id="itemTags" type="text" placeholder="开源, 多线程">
+        </div>
+        <div class="field">
+          <label>是否热门</label>
+          <select id="itemHot">
+            <option value="0">普通</option>
+            <option value="1">热门 HOT</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>取消</button>
+        <button class="btn" id="itemSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 分类编辑弹窗 ============ -->
+  <div class="modal-mask" id="catModal">
+    <div class="modal">
+      <h3 id="catModalTitle">新建分类</h3>
+      <input type="hidden" id="catId">
+      <div class="field">
+        <label>分类名称 *</label>
+        <input id="catName" type="text" placeholder="如：在线工具">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>图标（emoji）</label>
+          <input id="catIcon" type="text" placeholder="如：🧰">
+        </div>
+        <div class="field">
+          <label>简介</label>
+          <input id="catDesc" type="text" placeholder="如：打开网页就能用">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>取消</button>
+        <button class="btn" id="catSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/seed.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/admin.js"></script>
+</body>
+</html>

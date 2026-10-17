@@ -1,0 +1,11 @@
+{
+  "_说明": "把这个文件复制为 oss.conf.json 并填入自己的信息。oss.conf.json 含密钥，不要提交到 Git。",
+
+  "bucket": "your-bucket-name",
+  "endpoint": "oss-cn-hangzhou.aliyuncs.com",
+  "accessKeyId": "LTAI5tXXXXXXXXXXXXXXXX",
+  "accessKeySecret": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+
+  "_腾讯云COS说明": "COS 的 S3 兼容接口签名算法与 OSS 不同，本脚本主要针对阿里云 OSS；若用 COS 建议直接用官方 coscmd，或把安装包放 OSS。",
+  "_endpoint示例": "华东1(杭州)=oss-cn-hangzhou.aliyuncs.com, 华北2(北京)=oss-cn-beijing.aliyuncs.com, 华南1(深圳)=oss-cn-shenzhen.aliyuncs.com"
+}
